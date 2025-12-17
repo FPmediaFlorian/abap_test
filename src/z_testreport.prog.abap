@@ -9,6 +9,7 @@
 *& - List Output Formatting (Colors, Icons)
 *&---------------------------------------------------------------------*
 REPORT z_testreport MESSAGE-ID 00.
+INCLUDE <icon>.
 
 *----------------------------------------------------------------------*
 * Data Declarations
@@ -120,24 +121,55 @@ FORM display_output.
     RETURN.
   ENDIF.
 
-  WRITE: / 'ID' COLOR COL_HEADING,
-         10 'Name' COLOR COL_HEADING,
-         30 'Value' COLOR COL_HEADING,
-         45 'Date' COLOR COL_HEADING.
+  " Header
+  FORMAT COLOR COL_HEADING INTENSIFIED ON.
+  WRITE: / 'St',
+         5 'ID',
+         15 'Name',
+         40 'Value',
+         60 'Date',
+         75 'Trend'.
   ULINE.
+  FORMAT COLOR OFF.
 
   LOOP AT gt_data INTO gs_data.
-    " Alternate coloring or condition-based coloring
-    IF gs_data-value > 100.
-      FORMAT COLOR COL_POSITIVE INTENSIFIED OFF.
-    ELSE.
+    " Dynamic row background based on ID parity for zebra striping effect
+    IF sy-tabix MOD 2 = 0.
       FORMAT COLOR COL_NORMAL INTENSIFIED OFF.
+    ELSE.
+      FORMAT COLOR COL_BACKGROUND INTENSIFIED OFF. " Standard background
     ENDIF.
 
-    WRITE: / gs_data-id,
-           10 gs_data-name,
-           30 gs_data-value CURRENCY 'EUR',
-           45 gs_data-date.
+    " Status Icon
+    IF gs_data-value > 200.
+      WRITE: / icon_led_red AS ICON.
+    ELSEIF gs_data-value > 100.
+      WRITE: / icon_led_yellow AS ICON.
+    ELSE.
+      WRITE: / icon_led_green AS ICON.
+    ENDIF.
+
+    " Data Fields
+    WRITE: 5 gs_data-id COLOR COL_KEY INTENSIFIED OFF,
+           15 gs_data-name.
+
+    " Highlight Value Field
+    IF gs_data-value > 200.
+      WRITE: 40 gs_data-value CURRENCY 'EUR' COLOR COL_NEGATIVE INTENSIFIED OFF.
+    ELSEIF gs_data-value > 100.
+      WRITE: 40 gs_data-value CURRENCY 'EUR' COLOR COL_TOTAL INTENSIFIED OFF.
+    ELSE.
+      WRITE: 40 gs_data-value CURRENCY 'EUR' COLOR COL_POSITIVE INTENSIFIED OFF.
+    ENDIF.
+
+    WRITE: 60 gs_data-date.
+
+    " Trend Icon
+    IF gs_data-value > 150.
+      WRITE: 75 icon_trend_up AS ICON.
+    ELSE.
+      WRITE: 75 icon_trend_down AS ICON.
+    ENDIF.
 
     FORMAT COLOR OFF.
   ENDLOOP.
