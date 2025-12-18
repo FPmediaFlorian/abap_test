@@ -74,6 +74,7 @@ AT SELECTION-SCREEN.
 * Start of Selection (Main Processing)
 *----------------------------------------------------------------------*
 START-OF-SELECTION.
+  MESSAGE |You selected max: { p_max }| TYPE 'I'.
   PERFORM get_data.
   PERFORM process_data.
 
